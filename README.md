@@ -9,9 +9,9 @@ this repository needs to make its point.
 
 ## The Two Rules
 
-- **Expected failures are returned.** An invalid email or an address already taken are part of
-  the domain. They appear in the signature as a typed `Result`, and the value cannot be reached
-  without checking `ok`.
+- **Expected failures are returned.** An invalid email and an address already taken are part of
+  what registering a user means. They appear in the signature as a typed `Result`, and the value
+  cannot be reached without checking `ok`.
 - **Bugs and infrastructure failures are thrown.** A database that is down is not something the
   use case can promise anything about. It still throws, and it is handled once, at the edge.
 
@@ -51,19 +51,26 @@ to know and who checks that it knows it.
 
 ## The Files
 
+Each folder stands on its own: neither imports from the other, so either can be copied out alone.
+The duplication between them is deliberate.
+
 | File                                                             | What it holds                                                                                       |
 | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| [`src/result.ts`](src/result.ts)                                 | `Success<T>`, `Failure<E>`, `Result<T, E>`, and the two factories that build them                   |
-| [`src/email.ts`](src/email.ts)                                   | The `Email` value object, whose `create()` reports invalid input as a `Result<Email, EmailError>`   |
-| [`src/register-user.ts`](src/register-user.ts)                   | The use case with `Result`: `execute()` returns `Promise<Result<User, RegisterUserError>>`          |
-| [`src/register-user.throwing.ts`](src/register-user.throwing.ts) | The same use case with the same rules, reporting its expected failures as exceptions                |
+| [`src/throwing/email.ts`](src/throwing/email.ts)                 | `Email`, whose `create()` throws an `InvalidEmailError` on invalid input                            |
+| [`src/throwing/register-user.ts`](src/throwing/register-user.ts) | The use case with exceptions: `execute()` promises a `User` and throws `EmailTakenError`            |
+| [`src/result/result.ts`](src/result/result.ts)                   | `Success<T>`, `Failure<E>`, `Result<T, E>`, and the two factories that build them                   |
+| [`src/result/email.ts`](src/result/email.ts)                     | The same `Email` and rules, with `create()` returning a `Result<Email, EmailError>`                 |
+| [`src/result/register-user.ts`](src/result/register-user.ts)     | The same use case with `Result`: `execute()` returns `Promise<Result<User, RegisterUserError>>`     |
 | [`src/app.ts`](src/app.ts)                                       | The runnable comparison. Each `console.log` carries a `// ->` comment with the exact line it prints |
 
 ## Worth a Second Look
 
+- **The throwing `execute()` is shorter.** An invalid email leaves `Email.create()` as an
+  exception and travels up on its own, so there is no `if (!email.ok)` to write. That is the
+  real appeal of exceptions. The cost does not disappear; it moves to the caller.
 - **The `catch` blocks.** With exceptions, the `catch` receives every failure as `unknown` and
   separates them with a chain of `instanceof` checks kept by hand. Drop one and it still compiles,
-  and an invalid email gets reported as an unexpected error. With `Result`, the expected failures
+  and the failure it handled gets reported as unexpected. With `Result`, the expected failures
   never reach the `catch`, so the only thing left in it is the report of the unexpected ones.
 - **`toMessage()` is exhaustive.** Add a code to `RegisterUserError` and `toMessage()` stops
   compiling (`TS2366`), and oxlint's `switch-exhaustiveness-check` flags the missing case. The

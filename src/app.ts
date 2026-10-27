@@ -1,14 +1,16 @@
+// Both versions declare the same UserRepository shape, so the repositories
+// in this file serve either one.
 import {
   RegisterUser,
   type RegisterUserError,
   type User,
   type UserRepository,
-} from "./register-user.js";
+} from "./result/register-user.js";
+import { InvalidEmailError } from "./throwing/email.js";
 import {
   EmailTakenError,
-  InvalidEmailError,
   RegisterUserThrowing,
-} from "./register-user.throwing.js";
+} from "./throwing/register-user.js";
 
 // A database that is down: it throws, it does not return a Result.
 const unreachable: UserRepository = {
