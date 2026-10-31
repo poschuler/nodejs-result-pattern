@@ -1,8 +1,9 @@
 # Node.js Result Pattern
 
-Companion code for a post on [poschuler.com](https://poschuler.com) about the **Result pattern**
-in TypeScript. One use case, registering a user, is written twice — once with exceptions and once
-with `Result` — so the two can be read side by side.
+Companion code for the post
+[Implementing the Result pattern in Node.js](https://poschuler.com/blog/implementing-the-result-pattern-in-nodejs)
+on poschuler.com. One use case, registering a user, is written twice — once with exceptions and
+once with `Result` — so the two can be read side by side.
 
 No library, no `map` or `andThen`: a `Result` is a discriminated union on `ok`, and that is all
 this repository needs to make its point.
